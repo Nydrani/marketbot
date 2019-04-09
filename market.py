@@ -130,7 +130,7 @@ class MyClient(discord.Client):
         self.log_file.flush()
         os.fsync(self.log_file.fileno())
             
-test_mode = True
+test_mode = False
 
 if test_mode:
     cur_server_id = test_server_id

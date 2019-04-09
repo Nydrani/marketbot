@@ -91,7 +91,7 @@ class MyClient(discord.Client):
         os.fsync(self.log_file.fileno())
             
 
-test_mode = True
+test_mode = False
 
 if test_mode:
     cur_server_id = test_server_id
