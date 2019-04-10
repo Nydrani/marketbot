@@ -12,6 +12,7 @@ osm_sold_id = 553996752273801217
 
 my_token = '***REMOVED***'
 
+
 # TODO probably write a complete timeout if i get no legit messages for a day
 # pretty much means i dont have permissions (or parsing is incorrect)
 class MyClient(discord.Client):
@@ -28,7 +29,6 @@ class MyClient(discord.Client):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.log_file.close()
-
 
     async def on_ready(self):
         print("Ready")
@@ -67,12 +67,11 @@ class MyClient(discord.Client):
         print("Logging out")
         await client.logout()
 
-
     def parseMessage(self, message):
         # check correct channel
         if message.channel.id != self.sold_id and message.channel.id != self.listings_id:
             return
-     
+
         # prepare message
         prep_message = {}
         prep_message["content"] = message.content.strip()
@@ -82,14 +81,14 @@ class MyClient(discord.Client):
             prep_message["type"] = "sold"
         elif message.channel.id == self.listings_id:
             prep_message["type"] = "listing"
-     
+
         print(prep_message)
-     
+
         json_string = json.dumps(prep_message)
         self.log_file.write(json_string + '\n')
         self.log_file.flush()
         os.fsync(self.log_file.fileno())
-            
+
 
 test_mode = False
 
@@ -102,4 +101,3 @@ else:
 
 with MyClient("market_history.log", cur_server_id, cur_sold_id) as client:
     client.run(my_token, bot=False)
-

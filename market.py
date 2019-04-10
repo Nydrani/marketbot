@@ -1,5 +1,3 @@
-#!/usr/local/bin/python3
-
 import discord
 import json
 import os
@@ -131,7 +129,8 @@ class MyClient(discord.Client):
         self.log_file.write(json_string + '\n')
         self.log_file.flush()
         os.fsync(self.log_file.fileno())
-            
+
+
 test_mode = False
 
 if test_mode:
@@ -145,4 +144,3 @@ else:
 
 with MyClient("market.log", cur_server_id, cur_sold_id, cur_listings_id) as client:
     client.run(my_token, bot=False)
-
