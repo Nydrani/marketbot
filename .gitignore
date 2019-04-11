@@ -1,3 +1,4 @@
 *.log
 *.db
+backups
 __pycache__
