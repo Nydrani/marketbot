@@ -1,6 +1,8 @@
 import discord
 import json
 import os
+import peewee
+import marketparser
 
 test_sold_id = 564623272226848784
 test_listings_id = 564623286898655262
@@ -14,7 +16,6 @@ my_token = '***REMOVED***'
 
 # TODO probably write a complete timeout if i get no legit messages for a day
 # pretty much means i dont have permissions (or parsing is incorrect)
-
 
 class MyClient(discord.Client):
     hasPermissions = False
@@ -124,6 +125,9 @@ class MyClient(discord.Client):
             prep_message["type"] = "listing"
 
         print(prep_message)
+
+        # load into db
+        marketparser.loadDatabase(prep_message)
 
         json_string = json.dumps(prep_message)
         self.log_file.write(json_string + '\n')

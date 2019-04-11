@@ -55,11 +55,8 @@ class MyClient(discord.Client):
             return
 
         print("Reading history")
-        today = datetime.datetime.now()
-        month_delta = datetime.timedelta(days=30)
-        last_month = today - month_delta
         count = 0
-        async for message in sold_channel.history(limit=None, after=last_month):
+        async for message in sold_channel.history(limit=None):
             self.parseMessage(message)
             count += 1
 
@@ -69,7 +66,7 @@ class MyClient(discord.Client):
 
     def parseMessage(self, message):
         # check correct channel
-        if message.channel.id != self.sold_id and message.channel.id != self.listings_id:
+        if message.channel.id != self.sold_id:
             return
 
         # prepare message
@@ -77,10 +74,7 @@ class MyClient(discord.Client):
         prep_message["content"] = message.content.strip()
         prep_message["author"] = message.author.display_name.strip()
         prep_message["created_at"] = message.created_at.isoformat()
-        if message.channel.id == self.sold_id:
-            prep_message["type"] = "sold"
-        elif message.channel.id == self.listings_id:
-            prep_message["type"] = "listing"
+        prep_message["type"] = "sold"
 
         print(prep_message)
 
