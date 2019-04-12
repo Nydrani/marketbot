@@ -145,6 +145,7 @@ def loadDatabase(s):
     obj, created = Item.get_or_create(name=name)
 
     #print("found " + name)
+    # WARNING: Race conditions may happen when multithreaded
     sale, created = Sale.get_or_create(item_id=obj, amount=amount, cost=cost, time=time)
     if not created:
         # seems like the sale was already created. quit
