@@ -4,6 +4,7 @@ import playhouse.sqlite_ext
 import peewee
 from marketparser import Sale, Item, Equip
 import matplotlib.pyplot as plt
+from matplotlib.dates import DayLocator, WeekdayLocator, MO, DateFormatter
 import numpy as np
 
 def backupDatabase():
@@ -32,6 +33,74 @@ def calcWMA(average, time, cost):
     return result
 
 
+def running_mean(x, n):
+    cumsum = np.cumsum(np.insert(x, 0, 0))
+    return (cumsum[n:] - cumsum[:-n]) / float(n)
+
+def getVolumeData(cost_list, bins):
+    max_price = max(cost_list)
+    min_price = min(cost_list)
+
+    # get range within bins
+    bin_range = (max_price - min_price) / bins
+    bin_list = []
+
+    for cost in cost_list:
+        curPrice = min_price + bin_range / 2
+        bin_number = 0
+        while curPrice < cost:
+            curPrice += bin_range
+            bin_number += 1
+
+        bin_list.append(bin_number)
+
+    return bin_list
+
+def getDailyAverage(cost_list, time_list):
+    daily_price_list = []
+    daily_time_list = []
+
+    total_daily_price = 0
+    total_daily_items = 0
+    start_day = None
+    for i in range(len(time_list)):
+        # get all costs from one day --> calculate average (store in new list)
+        cur_day = time_list[i]
+        cur_price = cost_list[i]
+        print(cur_day.strftime("%d-%B"))
+
+        # edge case for start
+        if start_day == None:
+            total_daily_price = cur_price
+            total_daily_items = 1
+            start_day = cur_day
+            continue
+
+        # main loop
+        if start_day.date() != cur_day.date():
+            # different day -> save everything to daily price list
+            print("cur day: " + cur_day.strftime("%d-%B"))
+            print("start day: " + start_day.strftime("%d-%B"))
+            daily_price_list.append(total_daily_price / total_daily_items)
+            daily_time_list.append(start_day)
+
+            # set initial stuff to this
+            total_daily_price = cur_price
+            total_daily_items = 1
+            start_day = cur_day
+
+        total_daily_price += cur_price
+        total_daily_items += 1
+
+
+    print(daily_price_list)
+    print(daily_time_list)
+    print(len(daily_price_list))
+    print(len(daily_time_list))
+
+    return daily_price_list, daily_time_list
+
+
 def getPlotData(name):
 
     # Exponential moving average
@@ -40,26 +109,41 @@ def getPlotData(name):
 
     # given name --> find all sales with item name (name)
     # sort by date
-    for result in Sale.select(Sale.cost, Sale.time).join(Item).where(Item.name == name, Sale.item_id == Item.id):
-        time.append(result.time)
-        cost.append(result.cost)
+    for result in Sale.select(Sale.cost, Sale.time, Sale.amount).join(Item).where(Item.name == name, Sale.item_id == Item.id).order_by(Sale.time.asc()):
+        time.append(datetime.datetime.fromisoformat(result.time))
+        cost.append(result.cost / result.amount)
 
 
     return cost, time
 
         
 
+item_name = "Blue Potion"
 
-#getRunningAveragePrice("Opal")
+cost, time = getPlotData(item_name)
 
-cost, time = getPlotData("Diamond Ore")
-plt.scatter(time, cost, label='average price')
+week = WeekdayLocator(byweekday=MO)        # major ticks on the mondays
+alldays = DayLocator()              	# minor ticks on the days
+formatter = DateFormatter("%Y-%m-%d")              	# minor ticks on the days
+
+daily_cost, daily_time = getDailyAverage(cost, time)
+mean_cost = running_mean(daily_cost, 5)
+mean_cost_10 = running_mean(daily_cost, 10)
+
+fig, ax = plt.subplots()
+ax.xaxis.set_major_locator(week)
+ax.xaxis.set_major_formatter(formatter)
+ax.xaxis.set_minor_locator(alldays)
+ax.plot(daily_time, daily_cost, label='daily_price')
+ax.plot(daily_time[2:-2], mean_cost, label='running mean (window 5)')
+ax.plot(daily_time[5:-4], mean_cost_10, label='running mean (window 10)')
+
 
 plt.xlabel('time')
 plt.ylabel('cost')
-plt.gcf().autofmt_xdate()
+plt.margins(0)
 
-plt.title("Simple Plot")
+plt.title(item_name + " price")
 
 plt.legend()
 
