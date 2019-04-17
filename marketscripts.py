@@ -2,6 +2,7 @@ import pathlib
 import datetime
 import playhouse.sqlite_ext
 import peewee
+import sys
 from marketparser import Sale, Item, Equip
 import matplotlib.pyplot as plt
 from matplotlib.dates import DayLocator, WeekdayLocator, MO, DateFormatter
@@ -101,7 +102,7 @@ def getDailyAverage(cost_list, time_list):
     return daily_price_list, daily_time_list
 
 
-def getPlotData(name):
+def getPlotData(cool_name):
 
     # Exponential moving average
     cost = []
@@ -109,42 +110,68 @@ def getPlotData(name):
 
     # given name --> find all sales with item name (name)
     # sort by date
-    for result in Sale.select(Sale.cost, Sale.time, Sale.amount).join(Item).where(Item.name == name, Sale.item_id == Item.id).order_by(Sale.time.asc()):
+    #for result in Sale.select(Sale.cost, Sale.time, Sale.amount).join(Item).where(Item.name == name, Sale.item_id == Item.id).order_by(Sale.time.asc()):
+    for result in Sale.select(Sale.cost, Sale.time, Sale.amount).join(Item).where(Item.name == cool_name, Sale.item_id == Item.id).order_by(Sale.time.asc()):
         time.append(datetime.datetime.fromisoformat(result.time))
         cost.append(result.cost / result.amount)
 
+#    query = db.execute_sql('select sale.cost, sale.time, sale.amount from sale join item on item.id = sale.item_id where item.name = ? order by sale.time asc', (cool_name,));
+#    for result in query.fetchall():
+#        print(result)
+#        time.append(datetime.datetime.fromisoformat(result[1]))
+#        cost.append(result[0] / result[2])
 
     return cost, time
 
         
 
-item_name = "Blue Potion"
+def plotAndGenerateImage(item_name, save_location):
+    
+    cost, time = getPlotData(item_name)
+    # die on nothing
+    if not cost:
+        return False
 
-cost, time = getPlotData(item_name)
+    if not time:
+        return False
+    
+    week = WeekdayLocator(byweekday=MO)        # major ticks on the mondays
+    alldays = DayLocator()              	# minor ticks on the days
+    formatter = DateFormatter("%Y-%m-%d")              	# minor ticks on the days
+    
+    daily_cost, daily_time = getDailyAverage(cost, time)
+    mean_cost = running_mean(daily_cost, 5)
+    mean_cost_10 = running_mean(daily_cost, 10)
+    
+    fig, ax = plt.subplots()
+    ax.xaxis.set_major_locator(week)
+    ax.xaxis.set_major_formatter(formatter)
+    ax.xaxis.set_minor_locator(alldays)
+    ax.plot(daily_time, daily_cost, label='daily_price')
+    ax.plot(daily_time[2:-2], mean_cost, label='running mean (window 5)')
+    ax.plot(daily_time[5:-4], mean_cost_10, label='running mean (window 10)')
+    ax.set_ylim(bottom=0)
+    
+    
+    plt.xlabel('time')
+    plt.ylabel('cost')
+    plt.margins(0)
 
-week = WeekdayLocator(byweekday=MO)        # major ticks on the mondays
-alldays = DayLocator()              	# minor ticks on the days
-formatter = DateFormatter("%Y-%m-%d")              	# minor ticks on the days
+    
+    plt.title(item_name + " price")
+    
+    plt.legend()
+    
+    plt.savefig(save_location + '.png')
 
-daily_cost, daily_time = getDailyAverage(cost, time)
-mean_cost = running_mean(daily_cost, 5)
-mean_cost_10 = running_mean(daily_cost, 10)
+    return True
 
-fig, ax = plt.subplots()
-ax.xaxis.set_major_locator(week)
-ax.xaxis.set_major_formatter(formatter)
-ax.xaxis.set_minor_locator(alldays)
-ax.plot(daily_time, daily_cost, label='daily_price')
-ax.plot(daily_time[2:-2], mean_cost, label='running mean (window 5)')
-ax.plot(daily_time[5:-4], mean_cost_10, label='running mean (window 10)')
-
-
-plt.xlabel('time')
-plt.ylabel('cost')
-plt.margins(0)
-
-plt.title(item_name + " price")
-
-plt.legend()
-
-plt.show()
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python3 marketscripts.py name_of_item save_location")
+        sys.stdout.flush()
+        sys.exit(1)
+    
+    success = plotAndGenerateImage(sys.argv[1], sys.argv[2])
+    if not success:
+        sys.exit(1)
