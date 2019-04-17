@@ -7,10 +7,3 @@ body {
     top: 10vh;
     position: relative;
 }
-
-.header {
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -webkit-touch-callout: none;
-}
