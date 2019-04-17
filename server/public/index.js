@@ -26,6 +26,11 @@ new autoComplete({
     },
     key: ["names"]
   },
+  sort: (a, b) => {                    // Sort rendered results ascendingly | (Optional)
+    if (a.match < b.match) return -1;
+    if (a.match > b.match) return 1;
+    return 0;
+  },
   placeHolder: "Look for an item...",
   selector: "#autoComplete",
   threshold: 1,
