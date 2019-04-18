@@ -112,14 +112,9 @@ def getPlotData(cool_name):
     # sort by date
     #for result in Sale.select(Sale.cost, Sale.time, Sale.amount).join(Item).where(Item.name == name, Sale.item_id == Item.id).order_by(Sale.time.asc()):
     for result in Sale.select(Sale.cost, Sale.time, Sale.amount).join(Item).where(Item.name == cool_name, Sale.item_id == Item.id).order_by(Sale.time.asc()):
+        print(result.time)
         time.append(datetime.datetime.fromisoformat(result.time))
         cost.append(result.cost / result.amount)
-
-#    query = db.execute_sql('select sale.cost, sale.time, sale.amount from sale join item on item.id = sale.item_id where item.name = ? order by sale.time asc', (cool_name,));
-#    for result in query.fetchall():
-#        print(result)
-#        time.append(datetime.datetime.fromisoformat(result[1]))
-#        cost.append(result[0] / result[2])
 
     return cost, time
 

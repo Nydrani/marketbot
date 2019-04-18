@@ -15,7 +15,7 @@ const port = 3000;
 const runPy = function(item, save_location) {
   return new Promise(function(success, nosuccess) {
     const { spawn } = require('child_process');
-    const pyprog = spawn('python3', ['./marketscripts.py', item, save_location], { cwd: "../" });
+    const pyprog = spawn('python3.7', ['./marketscripts.py', item, save_location], { cwd: "../" });
 
     pyprog.on('exit', (data) => {
       if (data == 0) {
@@ -50,7 +50,7 @@ item_name_list = grab_item_list(non_equip_query);
 const my_refresher = setInterval(function() {
   console.log("refreshing list");
   item_name_list = grab_item_list(non_equip_query);
-}, 1000 * 60 * 10)
+}, 1000 * 60 * 20)
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/public'));
@@ -71,6 +71,7 @@ app.get('/', (req, res) => {
 
   // generate image
   const item_name = querystring.unescape(req.query.name);
+  console.log(item_name);
   runPy(item_name, "./server/public/graphs/current").then(() => {
     // completed generating
     // grab image from file
