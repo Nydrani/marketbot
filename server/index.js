@@ -57,7 +57,7 @@ app.set('views', path.join(__dirname, '/public'));
 
 
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '/public')));
 
 app.get('/', (req, res) => {
   // if req.query is empty ( give them empty) --> otehrwise give them cool stuff

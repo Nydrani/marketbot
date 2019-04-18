@@ -148,8 +148,8 @@ def plotAndGenerateImage(item_name, save_location):
     ax.set_ylim(bottom=0)
     
     
-    plt.xlabel('time')
-    plt.ylabel('cost')
+    plt.xlabel('date')
+    plt.ylabel('meos')
     plt.margins(0)
 
     
@@ -157,7 +157,7 @@ def plotAndGenerateImage(item_name, save_location):
     
     plt.legend()
     
-    plt.savefig(save_location + '.png')
+    plt.savefig(save_location + '.png', bbox_inches='tight')
 
     return True
 
