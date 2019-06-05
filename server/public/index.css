@@ -7,3 +7,19 @@ body {
     top: 2vh;
     position: relative;
 }
+
+.flex-container {
+    display: flex;
+}
+
+.flex-image-container {
+    margin: 2vw;
+    flex: 1;
+    min-width: 0;
+}
+
+.flex-image {
+    width: 100%;
+    height: auto;
+}
+

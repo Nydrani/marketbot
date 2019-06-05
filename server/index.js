@@ -9,9 +9,10 @@ const fs = require('fs');
 const app = express();
 const port = 3000;
 
+let image_num = 0
+
 
 // run market script function
-// TODO make new image for each search
 const runPy = function(item, save_location) {
   return new Promise(function(success, nosuccess) {
     const { spawn } = require('child_process');
@@ -26,6 +27,15 @@ const runPy = function(item, save_location) {
     });
   });
 }
+
+const readFilePromise = function(file_location) {
+  return new Promise(function(success, nosuccess) {
+      fs.readFile(file_location, (err, data) => {
+          err ? nosuccess(err) : success(data);
+      });
+  });
+}
+
 
 const db = new sqlite3.Database('../market.db', sqlite3.OPEN_READONLY);
 let item_name_list = [];
@@ -50,7 +60,7 @@ item_name_list = grab_item_list(non_equip_query);
 const my_refresher = setInterval(function() {
   console.log("refreshing list");
   item_name_list = grab_item_list(non_equip_query);
-}, 1000 * 60 * 20)
+}, 1000 * 60 * 60)
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/public'));
@@ -72,11 +82,24 @@ app.get('/', (req, res) => {
   // generate image
   const item_name = querystring.unescape(req.query.name);
   console.log(item_name);
-  runPy(item_name, "./server/public/graphs/current").then(() => {
+
+  // update image_num
+  const cur_num = image_num;
+  image_num++;
+  image_num = image_num % 25;
+
+  runPy(item_name, "./server/public/graphs/current" + cur_num).then(() => {
     // completed generating
     // grab image from file
-    const image = fs.readFileSync('./public/graphs/current.png')
-    res.render('./item.ejs', { image: image.toString('base64') });
+    const img_name = './public/graphs/current' + cur_num + '.png'
+    const img_name_zero_anchored  = './public/graphs/current' + cur_num + 'zeroanchored.png'
+
+    return Promise.all([readFilePromise(img_name), readFilePromise(img_name_zero_anchored)]);
+  }).then((args) => {
+    res.render('./item.ejs', {
+      image: args[0].toString('base64'),
+      imagezeroanchored: args[1].toString('base64')
+    });
   }).catch(() => {
     // item not found
     res.status(404).send("Not found");
