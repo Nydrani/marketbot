@@ -2,6 +2,10 @@ document.querySelector("#autoComplete").addEventListener("type", event => {
   console.log(event);
 });
 
+function changeGraph() {
+    alert(1);
+}
+
 /*
 document.addEventListener("blur", event => {
   var current = event.target;
