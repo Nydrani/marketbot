@@ -82,7 +82,6 @@ def parseEquipContents(contents):
 def loadDatabase(s):
     # ignoring listings for now
     if s['type'] != 'sold':
-        print("ignore listing types")
         return
 
     style1 = re.compile(r'^\(Channel +\d +FM +\d\) \*\*I just sold a\(n\) (.*) to .* for (.*) mesos!\*\*$')
@@ -98,7 +97,10 @@ def loadDatabase(s):
             break
 
     if matched is None:
-        print("problem here (strange input format)")
+        with open("problem.log", "a") as err:
+            err.write("problem here (strange input format): %s" % s['content'])
+
+        print("problem here (strange input format) check problem logs")
         print(s)
         return
 

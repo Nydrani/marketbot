@@ -121,10 +121,10 @@ class MyClient(discord.Client):
         prep_message["created_at"] = message.created_at.isoformat()
         if message.channel.id == self.sold_id:
             prep_message["type"] = "sold"
+            # print sold message
+            print(prep_message)
         elif message.channel.id == self.listings_id:
             prep_message["type"] = "listing"
-
-        print(prep_message)
 
         # load into db
         marketparser.loadDatabase(prep_message)
