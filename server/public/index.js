@@ -1,10 +1,20 @@
-document.querySelector("#autoComplete").addEventListener("type", event => {
-  console.log(event);
-});
-
 function changeGraph() {
-    alert(1);
+  var which = document.querySelector('input[name="graph-check"]:checked').value;
+  var autoscaledgraph = document.getElementById('autoscaled-graph');
+  var zeroanchoredgraph = document.getElementById('zeroanchored-graph');
+
+  // hide everyone
+  zeroanchoredgraph.style.display = "none";
+  autoscaledgraph.style.display = "none";
+
+  // show the correct graph
+  if (which === "autoscaled") {
+    autoscaledgraph.style.display = "initial";
+  } else if (which === "zeroanchored") {
+    zeroanchoredgraph.style.display = "initial";
+  }
 }
+
 
 /*
 document.addEventListener("blur", event => {
@@ -66,7 +76,7 @@ new autoComplete({
   // Hide Results list when not used
   document.addEventListener(eventType, event => {
     var current = event.target;
-    console.log(current);
+    //console.log(current);
     if (current === input || current === resultsList || input.contains(current) || resultsList.contains(current)) {
       resultsList.style.display = "block";
     } else {
@@ -75,3 +85,8 @@ new autoComplete({
   });
 });
 
+// initial list should be none display
+document.querySelector("#autoComplete_results_list").style.display = "none";
+
+// initial graph display
+changeGraph();
