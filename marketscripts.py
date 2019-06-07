@@ -170,7 +170,12 @@ def is_outlier(points, thresh=100):
     modified_z_score = 0.6745 * diff / med_abs_deviation
     return modified_z_score > thresh
 
-def plotAndGenerateImage(item_name, save_location):
+
+# type 1: daily
+# type 2: raw
+# scale 1: average
+# scale 2: zerod
+def plotAndGenerateImage(item_name, save_location, plot_type, scale_type):
     
     cost, time = getPlotData(item_name)
     # die on nothing
@@ -210,12 +215,20 @@ def plotAndGenerateImage(item_name, save_location):
     ax.xaxis.set_major_formatter(formatter)
     ax.xaxis.set_minor_locator(alldays)
 
-    if len(daily_cost) == 1:
-        ax.plot(daily_time, daily_cost, '#7ba5ed', marker='o', label='daily average price', alpha=0.8)
-    else:
-        ax.plot(daily_time, daily_cost, '#7ba5ed', label='daily average price', alpha=0.8)
-        ax.plot(daily_time[3:-3], mean_cost, '#e24f4f', label='running mean (window 7)')
-        #ax.plot(daily_time[7:-6], mean_cost_14, label='running mean (fortnight)')
+    if plot_type == 0:
+        if len(daily_cost) == 1:
+            ax.plot(daily_time, daily_cost, '#7ba5ed', marker='o', label='daily average price', alpha=0.8)
+        else:
+            ax.plot(daily_time, daily_cost, '#7ba5ed', label='daily average price', alpha=0.8)
+            ax.plot(daily_time[3:-3], mean_cost, '#e24f4f', label='running mean (window 7)')
+            #ax.plot(daily_time[7:-6], mean_cost_14, label='running mean (fortnight)')
+    elif plot_type == 1:
+        if len(filtered_cost) == 1:
+            ax.plot(filtered_time, filtered_cost, '#7ba5ed', marker='o', label='daily average price', alpha=0.8)
+        else:
+            filtered_mean_cost = running_mean(filtered_cost, 14)
+            ax.plot(filtered_time, filtered_cost, '#7ba5ed', label='average price', alpha=0.8)
+            ax.plot(filtered_time[7:-6], filtered_mean_cost, '#e24f4f', label='running mean (window 14)')
 
     ax.grid(True, 'major', 'y', linestyle='--', alpha=0.5)
     new_bot = ax.get_ybound()[0] * 0.9
@@ -228,22 +241,30 @@ def plotAndGenerateImage(item_name, save_location):
 
     plt.title(item_name + " price")
     plt.legend()
-    plt.savefig(save_location + '.png', bbox_inches='tight')
 
-    # also create zero_anchored image
-    ax.set_ylim(bottom=0)
-    plt.savefig(save_location + 'zeroanchored.png', bbox_inches='tight')
+    if scale_type == 0:
+        pass
+    elif scale_type == 1:
+        ax.set_ylim(bottom=0)
+
+    plt.savefig(save_location + '.png', bbox_inches='tight')
 
     return True
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 5:
         print("Usage: python3 marketscripts.py name_of_item save_location")
         sys.stdout.flush()
         sys.exit(1)
+
+    try:
+        int(sys.argv[3])
+        int(sys.argv[4])
+    except ValueError as e:
+        sys.exit(1)
     
-    success = plotAndGenerateImage(sys.argv[1], sys.argv[2])
+    success = plotAndGenerateImage(sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4]))
     if not success:
         sys.exit(1)
 

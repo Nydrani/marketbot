@@ -1,33 +1,75 @@
+var items = {};
+var item_name;
+var hidden = true;
+
 function changeGraph() {
-  var which = document.querySelector('input[name="graph-check"]:checked').value;
-  var autoscaledgraph = document.getElementById('autoscaled-graph');
-  var zeroanchoredgraph = document.getElementById('zeroanchored-graph');
+    var type = document.querySelector('input[name="graph-type"]:checked').value;
+    var scale = document.querySelector('input[name="graph-scale"]:checked').value;
 
-  // hide everyone
-  zeroanchoredgraph.style.display = "none";
-  autoscaledgraph.style.display = "none";
+    // already exists
+    if (type+scale in items) {
+        if (items[type+scale] != 'loading') {
+            document.getElementById('img-graph').src = items[type+scale];
+        }
+        return;
+    }
 
-  // show the correct graph
-  if (which === "autoscaled") {
-    autoscaledgraph.style.display = "initial";
-  } else if (which === "zeroanchored") {
-    zeroanchoredgraph.style.display = "initial";
-  }
+    if (!item_name) {
+        return;
+    }
+
+    // show the correct graph
+    if (type === "daily") {
+        var i = 0;
+    } else if (type === "raw") {
+        var i = 1;
+    }
+
+    if (scale === "autoscaled") {
+        var j = 0;
+    } else if (scale === "zeroanchored") {
+        var j = 1;
+    }
+
+    items[type+scale] = 'loading';
+    document.getElementById('loader').style.display = "initial";
+    fetch('./generate-graph?item=' + item_name + '&plot=' + i + '&scale=' + j).then((res) => {
+        return res.blob();
+    }).then((data) => {
+        var obj = URL.createObjectURL(data);
+        items[type+scale] = obj;
+
+        // update graph
+        var new_type = document.querySelector('input[name="graph-type"]:checked').value;
+        var new_scale = document.querySelector('input[name="graph-scale"]:checked').value;
+        if (new_type+new_scale in items && items[new_type+new_scale] != 'loading') {
+            document.getElementById('img-graph').src = items[new_type+new_scale];
+        }
+
+        let graphsLoading = false;
+        // show/hide loader
+        for (var prop in items) {
+            if (items[prop] == 'loading') {
+                // dont hide
+                graphsLoading = true;
+                break;
+            }
+        }
+
+        if (!graphsLoading) {
+            document.getElementById('loader').style.display = "none";
+        }
+
+        // show stuff
+        if (hidden) {
+            document.getElementById('img-graph').style.display = "initial";
+        }
+        hidden = false;
+    }).catch((err) => {
+        console.log(err);
+    });
 }
 
-
-/*
-document.addEventListener("blur", event => {
-  var current = event.target;
-  alert(current);
-  var resultsList = document.querySelector("#results_list")
-  if (eventType === ") {
-    resultsList.style.display = "block";
-  } else {
-    resultsList.style.display = "none";
-  }
-});
-*/
 
 new autoComplete({
   data: {
@@ -64,7 +106,11 @@ new autoComplete({
   },
   onSelection: feedback => {
     const selection = feedback.selection.value;
-    window.location.href = "./?name=" + selection;
+    document.querySelector("#autoComplete").value = "";
+    items = {};
+    item_name = selection;
+    changeGraph();
+    //window.location.href = "./?name=" + selection;
     // send selection to server to load image and data
   }
 });
@@ -88,5 +134,3 @@ new autoComplete({
 // initial list should be none display
 document.querySelector("#autoComplete_results_list").style.display = "none";
 
-// initial graph display
-changeGraph();

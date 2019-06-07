@@ -8,7 +8,39 @@
         <header class="header">
             <h1>Looking for something?</h1>
         </header>
-        <input autocomplete="off" type="text" name="name" id="autoComplete" tabindex="1">
+        <div style="height: 48px;">
+            <input autocomplete="off" type="text" name="name" id="autoComplete" tabindex="1">
+        </div>
+        <br>
+        <br>
+        <br>
+        <div id="flex-row" class="flex-container">
+            <form class="flex-radio">
+                <div>
+                    <input type="radio" onchange="changeGraph()" id="daily-graph" name="graph-type" value="daily" checked>
+                    <label for="daily-graph">Daily Price Graph</label>
+                </div>
+                <div>
+                    <input type="radio" onchange="changeGraph()" id="raw-graph" name="graph-type" value="raw">
+                    <label for="raw-graph">Raw Price Graph</label>
+                </div>
+            </form>
+            <div id="loader" class="lds-dual-ring" style="display: none;"></div>
+            <form class="flex-radio">
+                <div>
+                    <input type="radio" onchange="changeGraph()" id="autoscaled-graph-button" name="graph-scale" value="autoscaled" checked>
+                    <label for="autoscaled-graph-button">Auto-scaled Graph</label>
+                </div>
+                <div>
+                    <input type="radio" onchange="changeGraph()" id="zeroanchored-graph-button" name="graph-scale" value="zeroanchored">
+                    <label for="zeroanchored-graph-button">Zero-anchored Graph</label>
+                </div>
+            </form>
+        </div>
+        <br>
+        <div id="flex-col" class="flex-container">
+            <img id="img-graph" class="flex-image" style="display: none;" alt="nice">
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/gh/TarekRaafat/autoComplete.js@4.0.0/dist/js/autoComplete.js"></script>
     <script src="./index.js"></script>
