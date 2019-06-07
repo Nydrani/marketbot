@@ -82,7 +82,7 @@ clearImages(path.join(__dirname, 'public', 'graphs'));
 // refresh item_name_list every 1 hour
 // just in case i need to clear it
 const my_refresher = setInterval(function() {
-    console.log("scheduled job (updating list & deleting images");
+    console.log("scheduled job (updating list & deleting images)");
     clearImages(path.join(__dirname, 'public', 'graphs'));
     item_name_list = grab_item_list(non_equip_query);
 }, 1000 * 60 * 60)
