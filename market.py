@@ -12,7 +12,7 @@ osm_server_id = 496611148850921475
 osm_sold_id = 553996752273801217
 osm_listings_id = 553996579531653120
 
-my_token = '***REMOVED***'
+my_token = 'REMOVED'
 
 # TODO probably write a complete timeout if i get no legit messages for a day
 # pretty much means i dont have permissions (or parsing is incorrect)

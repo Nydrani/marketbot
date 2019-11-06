@@ -10,7 +10,7 @@ test_sold_id = 564623272226848784
 osm_server_id = 496611148850921475
 osm_sold_id = 553996752273801217
 
-my_token = '***REMOVED***'
+my_token = 'REMOVED'
 
 
 # TODO probably write a complete timeout if i get no legit messages for a day
